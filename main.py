@@ -39,7 +39,7 @@ warnings.filterwarnings("ignore")
 
 load_dotenv()
 
-loader = PyMuPDFLoader("./rag-dataset/funasa.pdf")
+loader = PyMuPDFLoader("./rag-dataset/fundepar.pdf")
 
 docs = loader.load()
 
