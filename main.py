@@ -14,7 +14,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from fastapi import FastAPI, Request
 
-
 # FastAPI
 app = FastAPI()
 
@@ -30,7 +29,6 @@ async def chat(request: Request):
         return {"error": "Pergunta não foi enviada"}
     output = rag_chain.invoke(question)
     return {"answer": output}
-
 
 # Ollama RAG
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -62,7 +60,21 @@ embeddings = OllamaEmbeddings(model='nomic-embed-text', base_url="http://localho
 
 single_vector = embeddings.embed_query("")
 
-index = faiss.IndexFlatL2(len(single_vector))
+# Check if GPU is available
+def is_gpu_available():
+    try:
+        res = faiss.StandardGpuResources()
+        return True
+    except Exception as e:
+        # print(f"GPU not available: {e}")
+        return False
+
+# Use FAISS with GPU support if available
+if is_gpu_available():
+    res = faiss.StandardGpuResources()
+    index = faiss.GpuIndexFlatL2(res, len(single_vector))
+else:
+    index = faiss.IndexFlatL2(len(single_vector))
 
 vector_store = FAISS(
     embedding_function=embeddings,
